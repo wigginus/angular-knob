@@ -1,61 +1,45 @@
 angular.module('ui.knob', [])
-  .directive('knob', function () {
-    return {
-      restrict: 'EACM',
-      template: function(elem, attrs){
+.directive('knob', function () {
+	return {
+		restrict: 'EACM',
+		template: function(elem, attrs){
+			return '<input value="{{ knob }}">';
+		},
+		replace: true,
+		scope: {
+			release : '&knobRelease',
+			change : '&knobChange',
+			data : '=knobData',
+			options : '=knobOptions'
+		},
+		link: function (scope, elem, attrs) {
 
-        return '<input value="{{ knob }}">';
+			if (!angular.isUndefined(scope.change)) {
+				scope.options.change = function() {
+					updateModel();
+					scope.$eval(scope.change);
+				}
+			}
 
-      },
-      replace: true,
-      scope: true,
-      link: function (scope, elem, attrs) {
+			if (!angular.isUndefined(scope.release)) {
+				scope.options.release = function() {
+					updateModel();
+					scope.$eval(scope.release);
+				}
+			}
 
-        scope.knob = scope.$eval(attrs.knobData);
+			function updateModel() {
+				setTimeout(function () {
+					scope.$apply(function() {
+						var currData = angular.element(elem).val();
+						scope.data.val = parseInt(currData,10);
+					});
+				}, 0);
 
-        var renderKnob = function(){
+			};
 
-          scope.knob = scope.$eval(attrs.knobData);
-
-          var opts = {}; 
-          if(!angular.isUndefined(attrs.knobOptions)){
-            opts = scope.$eval(attrs.knobOptions);
-          }
-
-          if(!angular.isUndefined(attrs.knobMax)){
-            var max = scope.$eval(attrs.knobMax);
-            if(!angular.isUndefined(max)){
-
-              opts.max = max;
-            
-            }
-          }
-          angular.element(elem).knob(opts);
-        };
-
-        var updateMax = function updateMax() {
-          var max = scope.$eval(attrs.knobMax);
-          var val = scope.$eval(attrs.knobData);
-          var $elem = angular.element(elem);
-          $elem.trigger('configure', {
-            'max': parseInt(max)
-          }).trigger('change');
-          $elem.val(val).change();
-        };
-
-        scope.$watch(attrs.knobData, function () {
-          scope.knob = scope.$eval(attrs.knobData);
-          angular.element(elem).val(scope.knob).change();
-        });
-
-        scope.$watch(attrs.knobMax, function() {
-          updateMax();
-        });
-
-        scope.$watch(attrs.knobOptions, function () {
-          renderKnob();
-        }, true);
-
-      }
-    };
-  });
+			elem.knob(scope.options);
+			elem.val(scope.data.val).change();
+		}
+	};
+});
