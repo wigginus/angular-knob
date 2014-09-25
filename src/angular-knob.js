@@ -14,6 +14,16 @@ angular.module('ui.knob', [])
 		},
 		link: function (scope, elem, attrs) {
 
+			function updateModel() {
+				setTimeout(function () {
+					scope.$apply(function() {
+						var currData = angular.element(elem).val();
+						scope.data.val = parseInt(currData,10);
+						scope.data.changed = true;
+					});
+				}, 0);
+			};
+
 			if (!angular.isUndefined(scope.change)) {
 				scope.options.change = function() {
 					updateModel();
@@ -23,20 +33,14 @@ angular.module('ui.knob', [])
 
 			if (!angular.isUndefined(scope.release)) {
 				scope.options.release = function() {
-					updateModel();
-					scope.$eval(scope.release);
+					if (scope.data.init) {
+						updateModel();
+						scope.$eval(scope.release);
+					} else {
+						scope.data.init = true;
+					}
 				}
 			}
-
-			function updateModel() {
-				setTimeout(function () {
-					scope.$apply(function() {
-						var currData = angular.element(elem).val();
-						scope.data.val = parseInt(currData,10);
-					});
-				}, 0);
-
-			};
 
 			elem.knob(scope.options);
 			elem.val(scope.data.val).change();
