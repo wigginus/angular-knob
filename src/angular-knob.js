@@ -40,9 +40,10 @@ angular.module('ui.knob', [])
 						scope.data.init = true;
 					}
 				}
-			}
+			}			
 
-			elem.knob(scope.options);
+			var knobDiv = elem.knob(scope.options);
+			knobDiv.append('<div class="knobLogo" style="background-image:'+scope.options.imgUrl+'"></div>');
 			elem.val(scope.data.val).change();
 		}
 	};
